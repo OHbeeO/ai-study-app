@@ -1,4 +1,5 @@
 // src/app/study/page.tsx
+export const dynamic = 'force-dynamic';
 'use client';
 
 import React, { useEffect, useState, FormEvent } from 'react'; // FormEvent 추가
