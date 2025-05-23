@@ -22,36 +22,42 @@ export async function POST(request: Request) {
       specificTopic
     } = body;
 
-    if (!subject || !mode || numQuestions === undefined || !questionType) { // numQuestions가 0일 수도 있으니 undefined 체크
+    if (!subject || !mode || numQuestions === undefined || !questionType) { 
       return NextResponse.json({ message: '필수 파라미터가 누락되었습니다 (subject, mode, numQuestions, questionType).' }, { status: 400 });
     }
     if (mode === 'userInput' && (!learnedContent || learnedContent.trim() === '')) {
       return NextResponse.json({ message: '학습 내용을 입력해주세요.' }, { status: 400 });
     }
 
-    // --- AI에게 실제 요청할 문제 개수 결정 ---
-    const userRequestedNumQuestions = Number(numQuestions); // 사용자가 요청한 실제 개수
+    const userRequestedNumQuestions = Number(numQuestions); 
     let numQuestionsToRequestFromAI = userRequestedNumQuestions;
 
-    // 'topicOnly' 모드이고 사용자가 1문제를 요청한 경우, AI에게는 3문제를 요청하여 다양성 확보
     if (mode === 'topicOnly' && userRequestedNumQuestions === 1) {
       numQuestionsToRequestFromAI = 3;
     }
-    // (나중에 이 부분을 확장해서, 사용자가 2문제 요청 시 AI에게 4문제 요청 등으로 설정할 수도 있습니다)
-    // --- ----------------------------- ---
-
+    
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
     const model = genAI.getGenerativeModel({
       model: MODEL_NAME,
-      safetySettings: [ /* ... 기존 안전 설정 ... */ ],
+      // 👇 여기에 실제 safetySettings 코드를 넣어줍니다.
+      safetySettings: [
+        { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_NONE },
+        { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold: HarmBlockThreshold.BLOCK_NONE },
+        { category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, threshold: HarmBlockThreshold.BLOCK_NONE },
+        { category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: HarmBlockThreshold.BLOCK_NONE },
+      ],
       generationConfig: {
-        temperature: 0.8, // 이전 단계에서 추가한 temperature
+        temperature: 0.8, 
       }
     });
 
     let instructionForAI = "";
-    const questionTypeDescription = /* ... 기존과 동일 ... */;
-    // commonQuestionInstruction에서 요청 문제 개수를 numQuestionsToRequestFromAI로 변경
+    // 👇 여기에 questionTypeDescription의 실제 정의 코드를 넣어줍니다.
+    const questionTypeDescription =
+      questionType === 'multipleChoice' ? '객관식 문제 (4개의 선택지 포함)' :
+      questionType === 'shortAnswer' ? '단답형 주관식 문제' :
+      '객관식 또는 단답형 주관식 문제 중 자유롭게';
+    
     const commonQuestionInstruction = `
       아래 조건에 맞춰 총 ${numQuestionsToRequestFromAI}개의 문제를 한국어로 만들어주세요.
       - 문제 유형: ${questionTypeDescription}.
@@ -59,12 +65,8 @@ export async function POST(request: Request) {
       - 문제는 서로 다른 내용을 다루도록 해주세요.`;
 
     if (mode === 'userInput') {
-      // ... (userInput 모드 프롬프트 구성, numQuestionsToRequestFromAI 사용하도록 수정 필요시 반영)
-      // userInput 모드에서는 사용자가 요청한 만큼만 생성해도 괜찮을 수 있으므로,
-      // commonQuestionInstruction을 여기서 재정의하거나, 처음부터 userRequestedNumQuestions를 사용할지 결정
-      // 여기서는 일관성을 위해 numQuestionsToRequestFromAI를 그대로 사용하겠습니다.
-       const summaryInstruction = `1. 내용을 간결하게 한국어로 요약해주세요. (1-2문장)`;
-       instructionForAI = `
+      const summaryInstruction = `1. 내용을 간결하게 한국어로 요약해주세요. (1-2문장)`;
+      instructionForAI = `
         당신은 학습 내용을 바탕으로 요약과 다양한 유형의 문제(객관식, 단답형) 및 해설을 한국어로 생성하는 AI 도우미입니다.
         주제: "${subject}"
         학습 내용: "${learnedContent}"
@@ -74,9 +76,8 @@ export async function POST(request: Request) {
         ${commonQuestionInstruction}
       `;
     } else { // mode === 'topicOnly'
-      // ... (topicOnly 모드 프롬프트 구성은 기존 로직 유지, commonQuestionInstruction은 위에서 변경됨) ...
       let topicSpecificInstructions = "";
-        if (subject === "데이터베이스" && userRequestedNumQuestions === 1) { // 데이터베이스 1문제 요청 시 특별히 (numQuestionsToRequestFromAI는 3이 됨)
+        if (subject === "데이터베이스" && userRequestedNumQuestions === 1) { 
             topicSpecificInstructions = `
             당신은 "데이터베이스" 주제에 대해 문제를 출제하는 AI입니다.
             "데이터베이스 키" 개념 외에 다른 중요한 데이터베이스 개념 (예: 정규화, SQL, 트랜잭션, 인덱스 등)에 대한 문제를 출제해주세요.
@@ -120,7 +121,6 @@ export async function POST(request: Request) {
             "answer": "정답",
             "explanation": "해설 내용"
           }
-          // ... 요청된 문제 개수만큼 반복 ...
         ]
       }
     `;
@@ -146,40 +146,37 @@ export async function POST(request: Request) {
         aiData.questions = [];
       }
     } catch (parseError: any) {
-      // ... 기존 파싱 에러 처리 ...
       return NextResponse.json({ message: 'AI 응답을 처리하는 중 에러가 발생했습니다. (Parsing Error)', rawResponse: aiResponseText }, { status: 500 });
     }
-
-    // --- AI가 생성한 문제들 중에서 사용자 요청 개수만큼 선택 ---
+    
     let finalQuestions = [];
     if (aiData.questions.length > 0) {
       if (mode === 'topicOnly' && userRequestedNumQuestions === 1 && aiData.questions.length >= numQuestionsToRequestFromAI) {
-        // AI에게 3문제 요청했고, 사용자는 1문제를 원했으므로, 3문제 중 1개를 랜덤 선택
         const randomIndex = Math.floor(Math.random() * aiData.questions.length);
         finalQuestions = [aiData.questions[randomIndex]];
       } else if (aiData.questions.length >= userRequestedNumQuestions) {
-        // AI가 생성한 문제 수가 사용자가 요청한 수보다 많거나 같으면, 요청한 수만큼만 잘라서 사용
         finalQuestions = aiData.questions.slice(0, userRequestedNumQuestions);
       } else {
-        // AI가 생성한 문제 수가 사용자가 요청한 수보다 적으면, 생성된 만큼만 사용
         finalQuestions = aiData.questions;
         console.warn(`AI returned ${aiData.questions.length} questions, user requested ${userRequestedNumQuestions}. Using all returned questions.`);
       }
     }
 
-    // 최종 문제들에 대해 ID를 1부터 순서대로 다시 부여
     finalQuestions.forEach((q: any, index: number) => {
       q.id = index + 1;
     });
-    // --- --------------------------------------- ---
-
+    
     return NextResponse.json({
       summary: (mode === 'topicOnly' && !aiData.summary) ? "" : aiData.summary,
-      questions: finalQuestions, // 최종 선택된 문제들로 응답
+      questions: finalQuestions, 
     });
 
   } catch (error: any) {
-    // ... 기존 에러 처리 ...
+    console.error('Gemini API 호출 또는 기타 에러:', error);
+    if (error.response) {
+      console.error('Error data:', error.response.data);
+      console.error('Error status:', error.response.status);
+    }
     return NextResponse.json({ message: error.message || 'Gemini API 요청 중 에러가 발생했습니다.' }, { status: 500 });
   }
 }
