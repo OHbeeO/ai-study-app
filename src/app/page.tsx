@@ -25,10 +25,6 @@ export default function HomePage() {
           </Link>
         ))}
       </div>
-
-      <button className="bg-blue-600 text-white py-3 px-6 rounded-xl text-lg font-semibold hover:bg-blue-700">
-        지금 학습 시작하기
-      </button>
     </div>
   );
 }
