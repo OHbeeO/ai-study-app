@@ -1,6 +1,7 @@
 // src/app/study/StudyPageClientContent.tsx
 'use client';
 
+import Link from 'next/link'; // Link 컴포넌트 추가
 import React, { useEffect, useState, FormEvent } from 'react';
 import { useSearchParams } from 'next/navigation';
 
@@ -110,7 +111,9 @@ export default function StudyPageClientContent() {
   return (
     <>
       <header className="mb-8 text-center">
-        <h1 className="text-3xl font-bold text-gray-800">학습 내용 입력 및 문제 생성</h1>
+        <Link href="/" className="inline-block"> {/* Link 컴포넌트로 감싸고, 인라인 블록으로 만듭니다. */}
+           <h1 className="text-3xl font-bold text-gray-800">학습 내용 입력 및 문제 생성</h1>
+        </Link>
         {subject && (
           <p className="text-xl text-blue-600 mt-2">
             선택한 학습 주제: <span className="font-semibold">{subject}</span>
