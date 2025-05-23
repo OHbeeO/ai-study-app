@@ -110,13 +110,37 @@ export default function StudyPageClientContent() {
   return (
     <>
       <header className="mb-8 text-center">
+        <h1 className="text-3xl font-bold text-gray-800">학습 내용 입력 및 문제 생성</h1>
+        {subject && (
+          <p className="text-xl text-blue-600 mt-2">
+            선택한 학습 주제: <span className="font-semibold">{subject}</span>
+          </p>
+        )}
         {/* ... 제목, 주제 표시는 동일 ... */}
       </header>
 
       {/* 모드 선택 UI - 기존과 동일 */}
       <div className="mb-6 flex justify-center space-x-4">
-        {/* ... 버튼들 ... */}
+         <button
+          onClick={() => setMode('userInput')}
+          className={`py-2 px-4 rounded-md font-semibold transition-colors ${
+            mode === 'userInput' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-black hover:bg-gray-300'
+          }`}
+        >
+          학습 내용 직접 입력
+        </button>
+        <button
+          onClick={() => {
+            setMode('topicOnly');
+          }}
+          className={`py-2 px-4 rounded-md font-semibold transition-colors ${
+            mode === 'topicOnly' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-black hover:bg-gray-300'
+          }`}
+        >
+          주제로 문제 생성
+        </button>
       </div>
+
 
       <form onSubmit={handleSubmit} className="w-full max-w-2xl bg-white p-8 rounded-lg shadow-md">
         {/* --- 문제 생성 옵션 UI 추가 --- */}
@@ -159,7 +183,19 @@ export default function StudyPageClientContent() {
 
         {mode === 'userInput' && (
           <div className="mb-6">
-            {/* ... 학습 내용 입력칸 ... */}
+             <label htmlFor="learnedContent" className="block text-lg font-medium text-gray-700 mb-2">
+              학습한 내용을 입력하세요:
+            </label>
+            <textarea
+              id="learnedContent"
+              name="learnedContent"
+              rows={10}
+              className="w-full p-3 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-black"
+              placeholder="여기에 학습 내용을 자세히 적어주세요..."
+              value={learnedContent}
+              onChange={(e) => setLearnedContent(e.target.value)}
+              disabled={isLoading}
+            />
           </div>
         )}
 
@@ -214,17 +250,17 @@ export default function StudyPageClientContent() {
                     onChange={(e) => handleAnswerChange(q.id || index, e.target.value)}
                     value={userAnswers[q.id || index] || ''}
                     disabled={submitted} // 제출 후 비활성화
-                    className="mt-2 w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                    className="mt-2 w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-black"
                     placeholder="답을 입력하세요"
                   />
                 )}
                 {/* 정답 및 해설은 제출 후에만 표시 */}
                 {submitted && (
                   <div className={`mt-3 p-3 rounded-md ${userAnswers[q.id || index] === q.answer ? 'bg-green-100 border-green-300' : 'bg-red-100 border-red-300'}`}>
-                    <p className="text-sm font-semibold">정답: {q.answer}</p>
+                    <p className="text-sm font-semibold text-black">정답: {q.answer}</p>
                     {q.explanation && <p className="text-xs text-gray-800 mt-1">해설: {q.explanation}</p>}
                     {userAnswers[q.id || index] !== q.answer && userAnswers[q.id || index] && (
-                        <p className="text-sm text-red-700">당신의 답: {userAnswers[q.id || index]}</p>
+                        <p className="text-sm text-red-700 ">당신의 답: {userAnswers[q.id || index]}</p>
                     )}
                   </div>
                 )}
