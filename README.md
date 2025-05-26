@@ -36,16 +36,16 @@
 ## 스크린샷 (Screenshots)
 
 **메인 페이지 (주제 선택 화면)**
-![메인 페이지](./screenshots/1.png)
+![메인 페이지](./screenshots/1.jpg)
 
 **학습 내용 입력 및 옵션 선택 화면**
-![학습 내용 입력 페이지](./screenshots/2.png)
-![주제로 문제 생성 페이지](./screenshots/3.png)
-![주제로 문제 생성 페이지](./screenshots/4.png)
+![학습 내용 입력 페이지](./screenshots/2.jpg)
+![주제로 문제 생성 페이지](./screenshots/3.jpg)
+![주제로 문제 생성 페이지](./screenshots/4.jpg)
 
 **AI 생성 문제 및 퀴즈 풀이 화면**
-![퀴즈 풀이 화면](./screenshots/5.png)
-![퀴즈 풀이 화면](./screenshots/6.png)
+![퀴즈 풀이 화면](./screenshots/5.jpg)
+![퀴즈 풀이 화면](./screenshots/6.jpg)
 
 
 
