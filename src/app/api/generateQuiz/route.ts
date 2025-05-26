@@ -39,7 +39,6 @@ export async function POST(request: Request) {
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
     const model = genAI.getGenerativeModel({
       model: MODEL_NAME,
-      // 👇 여기에 실제 safetySettings 코드를 넣어줍니다.
       safetySettings: [
         { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_NONE },
         { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold: HarmBlockThreshold.BLOCK_NONE },
@@ -52,7 +51,6 @@ export async function POST(request: Request) {
     });
 
     let instructionForAI = "";
-    // 👇 여기에 questionTypeDescription의 실제 정의 코드를 넣어줍니다.
     const questionTypeDescription =
       questionType === 'multipleChoice' ? '객관식 문제 (4개의 선택지 포함)' :
       questionType === 'shortAnswer' ? '단답형 주관식 문제' :
